@@ -7,6 +7,7 @@ from .models import Article
 class ArticleSerializer(serializers.ModelSerializer):
 
     time_published = serializers.SerializerMethodField()
+    author = serializers.StringRelatedField()
     class Meta:
         model = Article
         fields = "__all__"
