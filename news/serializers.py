@@ -1,22 +1,7 @@
 from datetime import datetime
 from django.utils.timesince import timesince
 from rest_framework import serializers
-from .models import Article
-
-
-class ArticleSerializer(serializers.ModelSerializer):
-
-    time_published = serializers.SerializerMethodField()
-    author = serializers.StringRelatedField()
-    class Meta:
-        model = Article
-        fields = "__all__"
-
-    def get_time_published(self, object):
-        published = object.published
-        now = datetime.now()
-        time_dalta = timesince(published, now)
-        return time_dalta
+from .models import Article, Journalist
 
 # class ArticleSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
@@ -50,3 +35,32 @@ class ArticleSerializer(serializers.ModelSerializer):
 #         if data["title"] == data["description"]:
 #             raise serializers.ValidationError("Title and Description must be different")
 #         return data
+
+
+
+class ArticleSerializer(serializers.ModelSerializer):
+
+    time_published = serializers.SerializerMethodField()
+    # author = JournalistSerializer()
+    class Meta:
+        model = Article
+        exclude = ("id", )
+
+    def get_time_published(self, object):
+        published = object.published
+        now = datetime.now()
+        time_dalta = timesince(published, now)
+        return time_dalta
+
+    def validate(self, data):
+        if data["title"] == data["description"]:
+            raise serializers.ValidationError("Title and Description must be different")
+        return data
+
+
+class JournalistSerializer(serializers.ModelSerializer):
+    articles = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name="article-detail")
+    # articles = ArticleSerializer(many=True, read_only=True)
+    class Meta:
+        model = Journalist
+        fields = "__all__"
